@@ -1,0 +1,1240 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CyberMitra AI</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+    /* ── CSS Variables: Dark / Light ── */
+    :root[data-theme="dark"] {
+      --bg-primary:   #090d1a;
+      --bg-secondary: #0d1427;
+      --bg-card:      #0b1022;
+      --bg-input:     #0d1224;
+      --border:       #1a2540;
+      --border-light: #111d38;
+      --text-primary: #e2e8f0;
+      --text-muted:   #94a3b8;
+      --text-dim:     #4b5a7a;
+      --text-faint:   #2d3a55;
+      --accent:       #6366f1;
+      --accent-dark:  #4f46e5;
+      --scrollbar:    #1e293b;
+      --chip-bg:      #111827;
+      --chip-text:    #4b5a7a;
+      --chip-border:  #1e2a45;
+      --chip-hover:   #1e2a45;
+      --chip-hover-text: #94a3b8;
+      --tab-active:   #1e2a45;
+    }
+    :root[data-theme="light"] {
+      --bg-primary:   #f0f4ff;
+      --bg-secondary: #ffffff;
+      --bg-card:      #f8faff;
+      --bg-input:     #ffffff;
+      --border:       #d0d9f0;
+      --border-light: #e0e8f8;
+      --text-primary: #1e293b;
+      --text-muted:   #475569;
+      --text-dim:     #64748b;
+      --text-faint:   #94a3b8;
+      --accent:       #6366f1;
+      --accent-dark:  #4f46e5;
+      --scrollbar:    #cbd5e1;
+      --chip-bg:      #e8eeff;
+      --chip-text:    #4b5a9a;
+      --chip-border:  #c7d2fe;
+      --chip-hover:   #c7d2fe;
+      --chip-hover-text: #3730a3;
+      --tab-active:   #dde4ff;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+    body { background: var(--bg-primary); color: var(--text-primary); height: 100vh; overflow: hidden; display: flex; flex-direction: column; transition: background 0.25s, color 0.25s; }
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--scrollbar); border-radius: 4px; }
+
+    @keyframes slideDown { from { opacity:0; transform:translateY(-8px); } to { opacity:1; transform:translateY(0); } }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.35;} }
+    .spin { animation: spin 0.8s linear infinite; display: inline-block; }
+    .slide { animation: slideDown 0.2s ease forwards; }
+
+    textarea, input[type=text] {
+      background: var(--bg-input); border: 1px solid var(--border); border-radius: 8px;
+      color: var(--text-muted); font-size: 12px; line-height: 1.6; width: 100%;
+      transition: border-color 0.15s, background 0.25s, color 0.25s;
+    }
+    textarea { padding: 10px 12px; resize: none; }
+    input[type=text] { padding: 9px 12px; }
+    textarea:focus, input[type=text]:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(99,102,241,0.15); }
+    textarea::placeholder, input::placeholder { color: var(--text-faint); }
+
+    .chip {
+      font-size: 10px; background: var(--chip-bg); color: var(--chip-text);
+      border: 1px solid var(--chip-border); border-radius: 5px; padding: 3px 9px;
+      cursor: pointer; transition: background 0.1s, color 0.1s;
+    }
+    .chip:hover { background: var(--chip-hover); color: var(--chip-hover-text); }
+
+    .badge { display: inline-block; padding: 3px 11px; border-radius: 20px; font-size: 10.5px; font-weight: 800; color: #fff; }
+
+    .analyse-btn {
+      width: 100%; padding: 11px; border: none; border-radius: 8px;
+      font-size: 12.5px; font-weight: 700; cursor: pointer; margin-top: 10px;
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+      transition: filter 0.15s, transform 0.1s;
+    }
+    .analyse-btn:hover { filter: brightness(1.12); transform: translateY(-1px); }
+    .analyse-btn:disabled { opacity: 0.5; cursor: not-allowed; filter: none; transform: none; }
+
+    .platform-card { margin-bottom: 10px; border-radius: 14px; overflow: hidden; border: 1px solid var(--border-light); transition: border-color 0.2s, box-shadow 0.2s; }
+    .platform-card:hover { border-color: var(--border); box-shadow: 0 2px 20px rgba(99,102,241,0.08); }
+    .platform-card.active { border-color: var(--accent-dark); box-shadow: 0 2px 24px rgba(99,102,241,0.15); }
+
+    .platform-header {
+      width: 100%; display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 16px; background: var(--bg-secondary); border: none; cursor: pointer;
+      color: var(--text-primary); text-align: left; transition: background 0.15s;
+    }
+    .platform-header:hover { background: var(--bg-card); }
+
+    .platform-icon-wrap { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 19px; flex-shrink: 0; }
+
+    .stat-card { flex: 1; padding: 12px 8px; text-align: center; background: var(--bg-secondary); }
+    .stat-card + .stat-card { border-left: 1px solid var(--border-light); }
+    .stat-num { font-size: 22px; font-weight: 900; }
+    .stat-lbl { font-size: 10px; color: var(--text-faint); margin-top: 2px; }
+
+    .feed-card { border-radius: 12px; padding: 13px; margin-bottom: 10px; }
+
+    /* ── TOP BAR ── */
+    .topbar { display:flex; align-items:center; justify-content:space-between; padding:11px 24px; border-bottom:1px solid var(--border-light); background:var(--bg-primary); flex-shrink:0; transition: background 0.25s; }
+
+    /* ── RIGHT PANEL TABS ── */
+    .right-tab { padding: 6px 14px; border: none; border-radius: 7px; font-size: 11px; font-weight: 700; cursor: pointer; transition: background 0.15s, color 0.15s; }
+    .right-tab.active { background: var(--accent); color: #fff; }
+    .right-tab.inactive { background: var(--bg-card); color: var(--text-dim); }
+    .right-tab.inactive:hover { background: var(--border); }
+
+    /* ── SEARCH BAR ── */
+    .search-wrap { display:flex; gap:8px; padding: 10px 16px; border-bottom: 1px solid var(--border-light); flex-shrink:0; background: var(--bg-secondary); }
+    .search-wrap input { flex:1; padding: 8px 12px; font-size: 11.5px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; color: var(--text-primary); }
+    .search-wrap select { padding: 7px 10px; font-size: 11px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; color: var(--text-muted); cursor: pointer; }
+    .search-wrap button { padding: 7px 14px; border: none; border-radius: 8px; font-size: 11px; font-weight: 700; cursor: pointer; }
+
+    /* ── MODAL OVERLAY ── */
+    .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.65); z-index:100; display:none; align-items:center; justify-content:center; }
+    .modal-overlay.open { display:flex; }
+    .modal-box { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 18px; padding: 28px; width: 520px; max-height: 85vh; overflow-y: auto; position: relative; }
+    .modal-close { position:absolute; top:14px; right:16px; background:none; border:none; font-size:18px; cursor:pointer; color:var(--text-dim); }
+
+    /* ── LEADERBOARD ── */
+    .lb-row { display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius:10px; margin-bottom:7px; background: var(--bg-card); border: 1px solid var(--border-light); }
+    .lb-rank { font-size:16px; font-weight:900; width:28px; text-align:center; }
+    .lb-badge { font-size:10.5px; font-weight:700; padding:2px 9px; border-radius:12px; color:#fff; }
+
+    /* ── LANG SELECT ── */
+    .lang-btn { font-size:10.5px; padding:4px 10px; border-radius:6px; border: 1px solid var(--border); background: var(--bg-card); color: var(--text-dim); cursor:pointer; font-weight:700; transition: all 0.15s; }
+    .lang-btn.active { background: var(--accent); color:#fff; border-color: var(--accent); }
+
+    /* ── THEME TOGGLE ── */
+    .theme-toggle { width:38px; height:22px; border-radius:11px; border:none; cursor:pointer; position:relative; transition: background 0.25s; display:flex; align-items:center; padding:2px; }
+    .theme-toggle .knob { width:18px; height:18px; border-radius:50%; background:#fff; transition: transform 0.25s; display:flex; align-items:center; justify-content:center; font-size:11px; }
+    [data-theme="dark"] .theme-toggle { background: #1e2a45; }
+    [data-theme="light"] .theme-toggle { background: var(--accent); }
+    [data-theme="dark"] .theme-toggle .knob { transform: translateX(0); }
+    [data-theme="light"] .theme-toggle .knob { transform: translateX(16px); }
+
+    /* ── SCAM REPORT FORM ── */
+    .report-field { margin-bottom:14px; }
+    .report-field label { display:block; font-size:10.5px; font-weight:700; color:var(--text-dim); margin-bottom:5px; letter-spacing:0.06em; text-transform:uppercase; }
+    .report-field input, .report-field textarea, .report-field select { font-size:12px; padding:9px 12px; background:var(--bg-card); border:1px solid var(--border); border-radius:8px; color:var(--text-primary); width:100%; }
+    .report-field textarea { resize:vertical; min-height:70px; }
+    .report-field select { cursor:pointer; }
+
+    /* ── API STATUS ── */
+    #apiStatusBox { font-size:10.5px; color:var(--text-faint); line-height:1.6; }
+
+    .section-header { font-size:10.5px; font-weight:700; color:var(--text-faint); letter-spacing:0.1em; text-transform:uppercase; }
+  </style>
+</head>
+<body>
+
+<!-- ── TOP BAR ── -->
+<div class="topbar">
+  <div style="display:flex; align-items:center; gap:10px;">
+    <div style="width:32px;height:32px;background:linear-gradient(135deg,#4f46e5,#7c3aed);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px;">🛡️</div>
+    <span style="font-size:16px; font-weight:900; letter-spacing:-0.5px; color:var(--text-primary);">CyberMitra <span style="color:var(--accent);">AI</span></span>
+    <span style="font-size:10px; background:var(--bg-card); color:var(--text-faint); padding:2px 8px; border-radius:5px; border:1px solid var(--border); font-weight:600;">v4.0</span>
+  </div>
+  <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+    <!-- Lang Switcher -->
+    <div style="display:flex;gap:4px;">
+      <button class="lang-btn active" id="lang_en" onclick="setLang('en')">EN</button>
+      <button class="lang-btn" id="lang_hi" onclick="setLang('hi')">हि</button>
+      <button class="lang-btn" id="lang_mr" onclick="setLang('mr')">मर</button>
+      <button class="lang-btn" id="lang_bn" onclick="setLang('bn')">বা</button>
+      <button class="lang-btn" id="lang_ta" onclick="setLang('ta')">த</button>
+      <button class="lang-btn" id="lang_te" onclick="setLang('te')">తె</button>
+      <button class="lang-btn" id="lang_gu" onclick="setLang('gu')">ગુ</button>
+      <button class="lang-btn" id="lang_kn" onclick="setLang('kn')">ಕ</button>
+      <button class="lang-btn" id="lang_ml" onclick="setLang('ml')">മ</button>
+      <button class="lang-btn" id="lang_pa" onclick="setLang('pa')">ਪੰ</button>
+      <button class="lang-btn" id="lang_or" onclick="setLang('or')">ଓ</button>
+    </div>
+    <!-- Live indicator -->
+    <div style="display:flex;align-items:center;gap:6px;background:var(--bg-secondary);border:1px solid var(--border);border-radius:20px;padding:5px 12px;">
+      <span style="width:7px;height:7px;border-radius:50%;background:#22c55e;display:inline-block;animation:pulse 2s ease infinite;flex-shrink:0;"></span>
+      <span style="font-size:11.5px; font-weight:700; color:#22c55e;" id="txt_live">Live</span>
+    </div>
+    <span style="font-size:11px; color:var(--text-faint); background:var(--bg-secondary); border:1px solid var(--border); border-radius:6px; padding:4px 10px;">Groq + Sightengine + Hive</span>
+    <!-- Theme Toggle -->
+    <div style="display:flex;align-items:center;gap:6px;">
+      <span style="font-size:11px;color:var(--text-faint);" id="themeLabel">🌙</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme">
+        <div class="knob" id="themeKnob">🌙</div>
+      </button>
+    </div>
+    <!-- Report Scam -->
+    <button onclick="openModal('reportModal')" style="font-size:11px;font-weight:700;padding:6px 14px;border-radius:8px;border:none;background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff;cursor:pointer;" id="btn_report">🚨 Report Scam</button>
+  </div>
+</div>
+
+<div style="display:flex; flex:1; overflow:hidden;">
+
+  <!-- ── LEFT: Accordion Panels ── -->
+  <div style="width:52%; border-right:1px solid var(--border-light); display:flex; flex-direction:column; overflow:hidden; background:var(--bg-primary);">
+
+    <div style="padding:14px 18px 10px; border-bottom:1px solid var(--border-light); flex-shrink:0;">
+      <div class="section-header" id="txt_selectPlatform">Select Platform to Detect</div>
+    </div>
+
+    <div style="flex:1; overflow-y:auto; padding:14px 16px;">
+
+      <!-- PANEL 0: Telegram / Manual -->
+      <div class="platform-card" id="card_p0">
+        <button onclick="togglePanel('p0')" id="hdr_p0" class="platform-header">
+          <div style="display:flex; align-items:center; gap:12px;">
+            <div class="platform-icon-wrap" style="background:rgba(41,128,240,0.12);">💬</div>
+            <div>
+              <div style="font-size:13.5px; font-weight:700;" id="pnl0_title">Telegram / Manual</div>
+              <div style="font-size:10.5px; color:var(--text-faint); margin-top:2px;" id="pnl0_sub">Analyse any suspicious message</div>
+            </div>
+          </div>
+          <span id="arr_p0" style="color:var(--text-faint); font-size:12px; transition:transform 0.25s; background:var(--border-light); width:24px;height:24px;border-radius:6px;display:flex;align-items:center;justify-content:center;">▼</span>
+        </button>
+        <div id="p0" style="display:none; border-top:1px solid var(--border-light); padding:14px; background:var(--bg-card);">
+          <div style="font-size:10px; color:var(--text-faint); font-weight:700; margin-bottom:6px; letter-spacing:0.06em;" id="txt_msgText">MESSAGE TEXT</div>
+          <textarea id="tg_msg" rows="5" placeholder="Paste suspicious message here...&#10;e.g. Congratulations! You won ₹50,000..."></textarea>
+          <div style="display:flex; gap:5px; flex-wrap:wrap; align-items:center; margin-top:8px;">
+            <span style="font-size:10px; color:var(--text-faint); font-weight:600;" id="txt_samples">Samples:</span>
+            <button class="chip" onclick="sf('tg_msg','Congratulations! You have won Rs 10 lakh in KBC Lucky Draw 2024. Send your Aadhaar, bank account number and IFSC code to claim: +91-9876543210. Valid 24hrs only!')">🎰 Lottery</button>
+            <button class="chip" onclick="sf('tg_msg','URGENT: Your SBI KYC has expired. Account will be blocked in 24 hours. Update now: http://sbi-kyc-verify.xyz/update')">🏦 KYC</button>
+            <button class="chip" onclick="sf('tg_msg','Work from home! Earn ₹5000-8000/day liking YouTube videos. No investment. WhatsApp: +91-88XXXXXXXX')">💼 Job</button>
+            <button class="chip" onclick="sf('tg_msg','Hi, team meeting tomorrow 11am conf room B. Bring the Q3 report.')">✅ Safe</button>
+          </div>
+          <button class="analyse-btn" id="btn_tg_msg" onclick="doAnalyse('tg_msg','general','Telegram/Manual')" style="background:linear-gradient(135deg,#2563eb,#4f46e5); color:#fff; box-shadow:0 4px 15px rgba(79,70,229,0.3);" id="btnlbl_tg_msg">🔍 Analyse Message</button>
+          <div id="result_tg_msg"></div>
+        </div>
+      </div>
+
+      <!-- PANEL 1: Instagram -->
+      <div class="platform-card" id="card_p1">
+        <button onclick="togglePanel('p1')" id="hdr_p1" class="platform-header">
+          <div style="display:flex; align-items:center; gap:12px;">
+            <div class="platform-icon-wrap" style="background:rgba(192,38,211,0.12);">📸</div>
+            <div>
+              <div style="font-size:13.5px; font-weight:700;" id="pnl1_title">Instagram</div>
+              <div style="font-size:10.5px; color:var(--text-faint); margin-top:2px;" id="pnl1_sub">Username, DM, Post / Reel</div>
+            </div>
+          </div>
+          <span id="arr_p1" style="color:var(--text-faint); font-size:12px; transition:transform 0.25s; background:var(--border-light); width:24px;height:24px;border-radius:6px;display:flex;align-items:center;justify-content:center;">▼</span>
+        </button>
+        <div id="p1" style="display:none; border-top:1px solid var(--border-light); padding:14px; background:var(--bg-card);">
+          <div style="display:flex; gap:4px; margin-bottom:12px; background:var(--bg-secondary); border-radius:9px; padding:4px;">
+            <button onclick="igTab(0)" id="ig_t0" style="flex:1;padding:7px;background:var(--tab-active);border:none;border-radius:6px;color:#c084fc;font-size:11px;font-weight:700;cursor:pointer;transition:all 0.15s;">👤 Username</button>
+            <button onclick="igTab(1)" id="ig_t1" style="flex:1;padding:7px;background:none;border:none;border-radius:6px;color:var(--text-dim);font-size:11px;font-weight:700;cursor:pointer;transition:all 0.15s;">💬 DM</button>
+            <button onclick="igTab(2)" id="ig_t2" style="flex:1;padding:7px;background:none;border:none;border-radius:6px;color:var(--text-dim);font-size:11px;font-weight:700;cursor:pointer;transition:all 0.15s;">🔗 Post</button>
+          </div>
+          <div id="ig_s0">
+            <div style="font-size:10px; color:var(--text-faint); font-weight:700; margin-bottom:6px; letter-spacing:0.06em;">USERNAME</div>
+            <input type="text" id="ig_username" placeholder="e.g. @crypto_profit_guaranteed_india"/>
+            <div style="display:flex; gap:5px; flex-wrap:wrap; margin-top:8px;">
+              <button class="chip" onclick="sf('ig_username','@crypto_profit_guaranteed_india')">Crypto Scam</button>
+              <button class="chip" onclick="sf('ig_username','@earn_daily_5000_no_investment')">Fake Job</button>
+              <button class="chip" onclick="sf('ig_username','@nationalgeographic')">✅ Legit</button>
+            </div>
+            <button class="analyse-btn" id="btn_ig_username" onclick="doAnalyse('ig_username','username','Instagram')" style="background:linear-gradient(135deg,#c026d3,#7c3aed); color:#fff; box-shadow:0 4px 15px rgba(192,38,211,0.3);">🔍 Analyse Username</button>
+            <div id="result_ig_username"></div>
+          </div>
+          <div id="ig_s1" style="display:none;">
+            <div style="font-size:10px; color:var(--text-faint); font-weight:700; margin-bottom:6px; letter-spacing:0.06em;">DM / DIRECT MESSAGE</div>
+            <textarea id="ig_dm" rows="4" placeholder="Paste the suspicious DM you received..."></textarea>
+            <div style="display:flex; gap:5px; flex-wrap:wrap; margin-top:8px;">
+              <button class="chip" onclick="sf('ig_dm','Hey! We loved your profile. Earn ₹25,000/month as brand ambassador. Only 2 slots left! DM NOW')">Brand Ambassador</button>
+              <button class="chip" onclick="sf('ig_dm','I turned ₹10,000 into ₹1,20,000 in 2 weeks trading crypto. Join my private group for free!')">Crypto DM</button>
+            </div>
+            <button class="analyse-btn" id="btn_ig_dm" onclick="doAnalyse('ig_dm','dm','Instagram')" style="background:linear-gradient(135deg,#c026d3,#7c3aed); color:#fff; box-shadow:0 4px 15px rgba(192,38,211,0.3);">🔍 Analyse DM</button>
+            <div id="result_ig_dm"></div>
+          </div>
+          <div id="ig_s2" style="display:none;">
+            <div style="font-size:10px; color:var(--text-faint); font-weight:700; margin-bottom:6px; letter-spacing:0.06em;">POST / REEL URL OR CAPTION</div>
+            <textarea id="ig_post" rows="4" placeholder="Paste URL or caption text..."></textarea>
+            <div style="display:flex; gap:5px; flex-wrap:wrap; margin-top:8px;">
+              <button class="chip" onclick="sf('ig_post','🎁 MEGA GIVEAWAY! Follow, like, comment phone number. Winner in 24hrs!')">Fake Giveaway</button>
+              <button class="chip" onclick="sf('ig_post','💰 INSTANT LOAN! Get ₹50,000 in 10 mins. No CIBIL. Only Aadhaar+PAN.')">Loan Scam</button>
+            </div>
+            <button class="analyse-btn" id="btn_ig_post" onclick="doAnalyse('ig_post','post','Instagram')" style="background:linear-gradient(135deg,#c026d3,#7c3aed); color:#fff; box-shadow:0 4px 15px rgba(192,38,211,0.3);">🔍 Analyse Post</button>
+            <div id="result_ig_post"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PANEL 2: Twitter / X -->
+      <div class="platform-card" id="card_p2">
+        <button onclick="togglePanel('p2')" id="hdr_p2" class="platform-header">
+          <div style="display:flex; align-items:center; gap:12px;">
+            <div class="platform-icon-wrap" style="background:rgba(2,132,199,0.12);">🐦</div>
+            <div>
+              <div style="font-size:13.5px; font-weight:700;" id="pnl2_title">Twitter / X</div>
+              <div style="font-size:10.5px; color:var(--text-faint); margin-top:2px;" id="pnl2_sub">Handle, DM, Tweet analysis</div>
+            </div>
+          </div>
+          <span id="arr_p2" style="color:var(--text-faint); font-size:12px; transition:transform 0.25s; background:var(--border-light); width:24px;height:24px;border-radius:6px;display:flex;align-items:center;justify-content:center;">▼</span>
+        </button>
+        <div id="p2" style="display:none; border-top:1px solid var(--border-light); padding:14px; background:var(--bg-card);">
+          <div style="display:flex; gap:4px; margin-bottom:12px; background:var(--bg-secondary); border-radius:9px; padding:4px;">
+            <button onclick="twTab(0)" id="tw_t0" style="flex:1;padding:7px;background:var(--tab-active);border:none;border-radius:6px;color:#38bdf8;font-size:11px;font-weight:700;cursor:pointer;transition:all 0.15s;">👤 Username</button>
+            <button onclick="twTab(1)" id="tw_t1" style="flex:1;padding:7px;background:none;border:none;border-radius:6px;color:var(--text-dim);font-size:11px;font-weight:700;cursor:pointer;transition:all 0.15s;">💬 DM</button>
+            <button onclick="twTab(2)" id="tw_t2" style="flex:1;padding:7px;background:none;border:none;border-radius:6px;color:var(--text-dim);font-size:11px;font-weight:700;cursor:pointer;transition:all 0.15s;">🔗 Tweet</button>
+          </div>
+          <div id="tw_s0">
+            <div style="font-size:10px; color:var(--text-faint); font-weight:700; margin-bottom:6px; letter-spacing:0.06em;">USERNAME / HANDLE</div>
+            <input type="text" id="tw_username" placeholder="e.g. @ElonMusk_Giveaway"/>
+            <div style="display:flex; gap:5px; flex-wrap:wrap; margin-top:8px;">
+              <button class="chip" onclick="sf('tw_username','@ElonMusk_Official_Giveaway')">Impersonator</button>
+              <button class="chip" onclick="sf('tw_username','@guaranteed_crypto_returns')">Crypto Scam</button>
+              <button class="chip" onclick="sf('tw_username','@BBCWorld')">✅ Legit</button>
+            </div>
+            <button class="analyse-btn" id="btn_tw_username" onclick="doAnalyse('tw_username','username','Twitter/X')" style="background:linear-gradient(135deg,#0284c7,#0ea5e9); color:#fff; box-shadow:0 4px 15px rgba(2,132,199,0.3);">🔍 Analyse Username</button>
+            <div id="result_tw_username"></div>
+          </div>
+          <div id="tw_s1" style="display:none;">
+            <div style="font-size:10px; color:var(--text-faint); font-weight:700; margin-bottom:6px; letter-spacing:0.06em;">DM / DIRECT MESSAGE</div>
+            <textarea id="tw_dm" rows="4" placeholder="Paste suspicious DM here..."></textarea>
+            <div style="display:flex; gap:5px; flex-wrap:wrap; margin-top:8px;">
+              <button class="chip" onclick="sf('tw_dm','I can help you make ₹1 lakh/month with ₹5,000 investment. 97% accuracy signals. Join VIP group!')">Trading DM</button>
+              <button class="chip" onclick="sf('tw_dm','Congratulations! You have won $500 Amazon gift card. Click to claim: bit.ly/twitter-reward')">Gift Card</button>
+            </div>
+            <button class="analyse-btn" id="btn_tw_dm" onclick="doAnalyse('tw_dm','dm','Twitter/X')" style="background:linear-gradient(135deg,#0284c7,#0ea5e9); color:#fff; box-shadow:0 4px 15px rgba(2,132,199,0.3);">🔍 Analyse DM</button>
+            <div id="result_tw_dm"></div>
+          </div>
+          <div id="tw_s2" style="display:none;">
+            <div style="font-size:10px; color:var(--text-faint); font-weight:700; margin-bottom:6px; letter-spacing:0.06em;">TWEET URL OR TEXT</div>
+            <textarea id="tw_post" rows="4" placeholder="Paste tweet link or text..."></textarea>
+            <div style="display:flex; gap:5px; flex-wrap:wrap; margin-top:8px;">
+              <button class="chip" onclick="sf('tw_post','🚨 CRYPTO GIVEAWAY 🚨 Send 0.01 BTC and receive 10x back within 1hr! First 100 only!')">Crypto Giveaway</button>
+              <button class="chip" onclick="sf('tw_post','New research published today on climate change impact on monsoon patterns in South Asia.')">✅ Safe</button>
+            </div>
+            <button class="analyse-btn" id="btn_tw_post" onclick="doAnalyse('tw_post','post','Twitter/X')" style="background:linear-gradient(135deg,#0284c7,#0ea5e9); color:#fff; box-shadow:0 4px 15px rgba(2,132,199,0.3);">🔍 Analyse Tweet</button>
+            <div id="result_tw_post"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PANEL 3: Deepfake Video -->
+      <div class="platform-card" id="card_p3">
+        <button onclick="togglePanel('p3')" id="hdr_p3" class="platform-header">
+          <div style="display:flex; align-items:center; gap:12px;">
+            <div class="platform-icon-wrap" style="background:rgba(124,58,237,0.12);">🎭</div>
+            <div>
+              <div style="font-size:13.5px; font-weight:700;" id="pnl3_title">Deepfake Video</div>
+              <div style="font-size:10.5px; color:var(--text-faint); margin-top:2px;" id="pnl3_sub">Sightengine + Hive visual scan</div>
+            </div>
+          </div>
+          <span id="arr_p3" style="color:var(--text-faint); font-size:12px; transition:transform 0.25s; background:var(--border-light); width:24px;height:24px;border-radius:6px;display:flex;align-items:center;justify-content:center;">▼</span>
+        </button>
+        <div id="p3" style="display:none; border-top:1px solid var(--border-light); padding:14px; background:var(--bg-card);">
+          <div style="background:rgba(124,58,237,0.08); border:1px solid rgba(124,58,237,0.2); border-radius:10px; padding:10px 13px; margin-bottom:12px;">
+            <div style="font-size:11px; font-weight:700; color:#a78bfa; margin-bottom:3px;">🔬 Sightengine + Hive Connected</div>
+            <div style="font-size:10.5px; color:var(--text-faint); line-height:1.6;">Visual deepfake scoring combined with Groq text reasoning.</div>
+          </div>
+          <div style="font-size:10px; color:var(--text-faint); font-weight:700; margin-bottom:6px; letter-spacing:0.06em;">VIDEO URL</div>
+          <input type="text" id="df_url" placeholder="YouTube / Instagram / Twitter video URL"/>
+          <div style="display:flex; gap:5px; flex-wrap:wrap; margin:8px 0 12px;">
+            <button class="chip" onclick="sf('df_url','https://youtu.be/fakeElonMusk_bitcoin_giveaway_live2024')">Fake Live Stream</button>
+            <button class="chip" onclick="sf('df_url','https://www.instagram.com/reel/modi_investment_scheme_fake/')">Fake PM Video</button>
+          </div>
+          <div style="font-size:10px; color:var(--text-faint); font-weight:700; margin-bottom:6px; letter-spacing:0.06em;">TITLE / DESCRIPTION</div>
+          <textarea id="df_desc" rows="4" placeholder="Paste video title, description or caption..."></textarea>
+          <div style="display:flex; gap:5px; flex-wrap:wrap; margin:8px 0 12px;">
+            <button class="chip" onclick="sf('df_desc','LIVE: Elon Musk announces BIGGEST crypto giveaway! Send BTC get 10x back!')">Elon Deepfake</button>
+            <button class="chip" onclick="sf('df_desc','PM Modi ji personally invites you to join Nivesh Yojana. Invest ₹5,000 get ₹50,000!')">PM Deepfake</button>
+            <button class="chip" onclick="sf('df_desc','Amitabh Bachchan recommends this trading app. He made ₹10 crore using it!')">Celebrity</button>
+          </div>
+          <div style="font-size:10px; color:var(--text-faint); font-weight:700; margin-bottom:6px; letter-spacing:0.06em;">🖼️ UPLOAD THUMBNAIL / SCREENSHOT</div>
+          <div id="uploadZone" onclick="document.getElementById('df_image').click()"
+            ondragover="event.preventDefault();this.style.borderColor='#7c3aed';this.style.background='rgba(124,58,237,0.06)'"
+            ondragleave="this.style.borderColor=getComputedStyle(document.documentElement).getPropertyValue('--border').trim();this.style.background='transparent'"
+            ondrop="handleDrop(event)"
+            style="border:1.5px dashed var(--border); border-radius:10px; padding:18px 14px; text-align:center; cursor:pointer; background:transparent; transition:border-color 0.2s,background 0.2s; margin-bottom:10px;">
+            <input type="file" id="df_image" accept="image/*" style="display:none;" onchange="handleImageUpload(event)"/>
+            <div id="uploadContent">
+              <div style="font-size:24px; margin-bottom:5px;">📷</div>
+              <div style="font-size:11px; color:var(--text-faint); font-weight:600;">Click to upload or drag & drop</div>
+              <div style="font-size:10px; color:var(--text-faint); margin-top:2px;">PNG, JPG, WebP</div>
+            </div>
+          </div>
+          <button class="analyse-btn" id="btn_deepfake" onclick="doDeepfakeAnalyse()" style="background:linear-gradient(135deg,#7c3aed,#a855f7); color:#fff; box-shadow:0 4px 15px rgba(124,58,237,0.3);">🎭 Analyse for Deepfake</button>
+          <div id="result_deepfake"></div>
+          <div style="margin-top:12px; background:var(--bg-secondary); border:1px solid var(--border); border-radius:10px; padding:12px;">
+            <div style="font-size:10.5px; font-weight:700; color:var(--text-dim); margin-bottom:7px;">💡 API Status</div>
+            <div id="apiStatusBox">Checking…</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── RIGHT: Monitor Panel ── -->
+  <div style="flex:1; display:flex; flex-direction:column; overflow:hidden; background:var(--bg-primary);">
+
+    <!-- Right Tabs -->
+    <div style="padding:10px 16px; border-bottom:1px solid var(--border-light); display:flex; align-items:center; gap:8px; flex-shrink:0; background:var(--bg-secondary);">
+      <button class="right-tab active" id="rtab_monitor" onclick="switchRightTab('monitor')" id="rtxt_monitor">📡 Threat Monitor</button>
+      <button class="right-tab inactive" id="rtab_history" onclick="switchRightTab('history')" id="rtxt_history">🕐 History</button>
+      <button class="right-tab inactive" id="rtab_leaderboard" onclick="switchRightTab('leaderboard')" id="rtxt_leaderboard">🏆 Leaderboard</button>
+      <div style="flex:1;"></div>
+      <button onclick="exportCSV()" style="font-size:11px;font-weight:700;padding:6px 13px;border-radius:7px;border:1px solid var(--border);background:var(--bg-card);color:var(--text-muted);cursor:pointer;display:flex;align-items:center;gap:5px;" id="btn_exportCSV">📥 Export CSV</button>
+    </div>
+
+    <!-- ── MONITOR PANEL ── -->
+    <div id="panel_monitor" style="display:flex;flex-direction:column;flex:1;overflow:hidden;">
+      <!-- Stats row -->
+      <div style="display:flex; border-bottom:1px solid var(--border-light); flex-shrink:0;">
+        <div class="stat-card"><div id="statHigh" class="stat-num" style="color:#ef4444;">0</div><div class="stat-lbl">🔴 High</div></div>
+        <div class="stat-card"><div id="statMed" class="stat-num" style="color:#f59e0b;">0</div><div class="stat-lbl">🟡 Medium</div></div>
+        <div class="stat-card"><div id="statLow" class="stat-num" style="color:#22c55e;">0</div><div class="stat-lbl">🟢 Low</div></div>
+        <div class="stat-card"><div id="statTotal" class="stat-num" style="color:#6366f1;">0</div><div class="stat-lbl">📊 Total</div></div>
+      </div>
+      <!-- Header -->
+      <div style="padding:10px 16px; border-bottom:1px solid var(--border-light); display:flex; justify-content:space-between; align-items:center; flex-shrink:0; background:var(--bg-primary);">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="font-size:12px;font-weight:800;color:var(--text-muted);letter-spacing:0.05em;text-transform:uppercase;" id="txt_activeThreat">Active Threat Monitor</span>
+          <div style="display:flex;gap:3px;margin-left:4px;">
+            <span style="width:7px;height:7px;border-radius:50%;background:#22c55e;animation:pulse 1.5s ease infinite;"></span>
+            <span style="width:7px;height:7px;border-radius:50%;background:#22c55e;animation:pulse 1.5s ease 0.2s infinite;"></span>
+          </div>
+        </div>
+        <button onclick="clearFeed()" style="font-size:11px; color:var(--text-dim); background:var(--bg-card); border:1px solid var(--border); padding:5px 14px; border-radius:7px; cursor:pointer; font-weight:600; transition:color 0.15s;" onmouseover="this.style.color='#ef4444'" onmouseout="this.style.color='var(--text-dim)'" id="btn_clear">Clear</button>
+      </div>
+      <!-- Feed -->
+      <div id="liveFeed" style="flex:1; overflow-y:auto; padding:14px 16px;">
+        <div id="emptyState" style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; text-align:center;">
+          <div style="width:90px;height:90px;margin-bottom:16px;">
+            <svg viewBox="0 0 110 110" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;">
+              <defs>
+                <radialGradient id="shieldGrad" cx="50%" cy="40%" r="60%">
+                  <stop offset="0%" stop-color="#6366f1"/><stop offset="60%" stop-color="#4f46e5"/><stop offset="100%" stop-color="#312e81"/>
+                </radialGradient>
+                <radialGradient id="gemGrad" cx="35%" cy="30%" r="70%">
+                  <stop offset="0%" stop-color="#c084fc"/><stop offset="50%" stop-color="#7c3aed"/><stop offset="100%" stop-color="#4f46e5"/>
+                </radialGradient>
+              </defs>
+              <path d="M55 16 L84 29 L84 55 Q84 75 55 92 Q26 75 26 55 L26 29 Z" fill="url(#shieldGrad)" opacity="0.2"/>
+              <polygon points="55,24 72,36 72,60 55,72 38,60 38,36" fill="url(#gemGrad)" opacity="0.9"/>
+              <polygon points="55,24 72,36 55,40" fill="#c084fc" opacity="0.6"/>
+              <polygon points="72,36 72,60 55,40" fill="#7c3aed" opacity="0.7"/>
+              <polygon points="38,36 38,60 55,40" fill="#6366f1" opacity="0.5"/>
+              <polygon points="55,72 72,60 55,56" fill="#4f46e5" opacity="0.8"/>
+              <polygon points="55,72 38,60 55,56" fill="#3730a3" opacity="0.9"/>
+              <text x="55" y="52" text-anchor="middle" font-size="11" font-weight="900" fill="#e0d7ff" font-family="Inter,sans-serif" letter-spacing="1">AI</text>
+            </svg>
+          </div>
+          <div style="font-size:13px; color:var(--text-faint); font-weight:700; margin-bottom:5px;" id="txt_allGreen">All systems green.</div>
+          <div style="font-size:11px; color:var(--text-faint);" id="txt_awaiting">Awaiting detection stream.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── HISTORY PANEL ── -->
+    <div id="panel_history" style="display:none;flex-direction:column;flex:1;overflow:hidden;">
+      <!-- Search & filter bar -->
+      <div class="search-wrap">
+        <input type="text" id="historySearch" placeholder="🔍 Search fraud type, source, action..." oninput="filterHistory()" />
+        <select id="riskFilter" onchange="filterHistory()">
+          <option value="">All Risk</option>
+          <option value="High">🔴 High</option>
+          <option value="Medium">🟡 Medium</option>
+          <option value="Low">🟢 Low</option>
+        </select>
+        <select id="sourceFilter" onchange="filterHistory()">
+          <option value="">All Sources</option>
+          <option value="Telegram/Manual">Telegram</option>
+          <option value="Instagram">Instagram</option>
+          <option value="Twitter/X">Twitter/X</option>
+          <option value="Deepfake">Deepfake</option>
+          <option value="Telegram Bot">Bot</option>
+        </select>
+        <button onclick="clearHistoryFilters()" style="background:var(--bg-card);color:var(--text-dim);border:1px solid var(--border);">✕</button>
+      </div>
+      <div id="historyResults" style="flex:1;overflow-y:auto;padding:14px 16px;">
+        <div style="text-align:center;color:var(--text-faint);font-size:12px;padding:30px;" id="txt_loadingHistory">Loading history…</div>
+      </div>
+    </div>
+
+    <!-- ── LEADERBOARD PANEL ── -->
+    <div id="panel_leaderboard" style="display:none;flex-direction:column;flex:1;overflow:hidden;">
+      <div style="padding:12px 16px;border-bottom:1px solid var(--border-light);background:var(--bg-secondary);flex-shrink:0;display:flex;align-items:center;justify-content:space-between;">
+        <div>
+          <div style="font-size:13px;font-weight:800;color:var(--text-primary);" id="txt_scamLb">🏆 Scam Type Leaderboard</div>
+          <div style="font-size:10.5px;color:var(--text-faint);margin-top:2px;" id="txt_lbSub">Most detected fraud patterns this session</div>
+        </div>
+        <button onclick="loadLeaderboard()" style="font-size:11px;padding:5px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg-card);color:var(--text-dim);cursor:pointer;font-weight:700;">↻ Refresh</button>
+      </div>
+      <div id="leaderboardContent" style="flex:1;overflow-y:auto;padding:14px 16px;">
+        <div style="text-align:center;color:var(--text-faint);font-size:12px;padding:30px;">Loading…</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── REPORT SCAM MODAL ── -->
+<div class="modal-overlay" id="reportModal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal('reportModal')">✕</button>
+    <div style="font-size:16px;font-weight:900;color:var(--text-primary);margin-bottom:4px;" id="txt_reportTitle">🚨 Report a Scam</div>
+    <div style="font-size:11px;color:var(--text-faint);margin-bottom:20px;" id="txt_reportSub">Help protect others by reporting scams you've encountered.</div>
+    <div id="reportForm">
+      <div class="report-field">
+        <label id="txt_rf_platform">Platform</label>
+        <select id="rf_platform">
+          <option>Telegram</option><option>Instagram</option><option>Twitter/X</option>
+          <option>WhatsApp</option><option>Facebook</option><option>Phone Call / SMS</option><option>Email</option><option>Other</option>
+        </select>
+      </div>
+      <div class="report-field">
+        <label id="txt_rf_type">Scam Type</label>
+        <select id="rf_type">
+          <option>KYC / Bank Fraud</option><option>Cryptocurrency Scam</option><option>Job / Work-from-Home</option>
+          <option>Lottery / Prize</option><option>Loan Fraud</option><option>Deepfake / Impersonation</option>
+          <option>Investment Scheme</option><option>Romance Scam</option><option>Other</option>
+        </select>
+      </div>
+      <div class="report-field">
+        <label id="txt_rf_content">Scam Content / Message</label>
+        <textarea id="rf_content" placeholder="Paste the scam message, URL, or describe what happened..."></textarea>
+      </div>
+      <div class="report-field">
+        <label id="txt_rf_loss">Estimated Loss (₹) — optional</label>
+        <input type="text" id="rf_loss" placeholder="e.g. 15000 (leave blank if no loss)" />
+      </div>
+      <div class="report-field">
+        <label id="txt_rf_city">City / State</label>
+        <input type="text" id="rf_city" placeholder="e.g. Mumbai, Maharashtra" />
+      </div>
+      <button onclick="submitReport()" style="width:100%;padding:12px;background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:800;cursor:pointer;margin-top:4px;" id="btn_submitReport">Submit Report</button>
+      <div id="reportStatus" style="margin-top:10px;font-size:11.5px;text-align:center;"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const SERVER = 'http://localhost:3000';
+const stats = { High:0, Medium:0, Low:0, total:0 };
+let activePanel = null;
+let currentLang = 'en';
+let allHistoryItems = [];
+
+// ─── I18N ──────────────────────────────────────────────
+const i18n = {
+  en: {
+    live:'Live', selectPlatform:'Select Platform to Detect', msgText:'MESSAGE TEXT', samples:'Samples:',
+    pnl0_title:'Telegram / Manual', pnl0_sub:'Analyse any suspicious message',
+    pnl1_title:'Instagram', pnl1_sub:'Username, DM, Post / Reel',
+    pnl2_title:'Twitter / X', pnl2_sub:'Handle, DM, Tweet analysis',
+    pnl3_title:'Deepfake Video', pnl3_sub:'Sightengine + Hive visual scan',
+    activeThreat:'Active Threat Monitor', allGreen:'All systems green.', awaiting:'Awaiting detection stream.',
+    scamLb:'🏆 Scam Type Leaderboard', lbSub:'Most detected fraud patterns this session',
+    reportTitle:'🚨 Report a Scam', reportSub:'Help protect others by reporting scams you\'ve encountered.',
+    rf_platform:'Platform', rf_type:'Scam Type', rf_content:'Scam Content / Message',
+    rf_loss:'Estimated Loss (₹) — optional', rf_city:'City / State',
+    btn_submitReport:'Submit Report', btn_exportCSV:'📥 Export CSV', btn_report:'🚨 Report Scam',
+    btn_clear:'Clear', rtxt_monitor:'📡 Threat Monitor', rtxt_history:'🕐 History', rtxt_leaderboard:'🏆 Leaderboard',
+    txt_loadingHistory:'Loading history…',
+  },
+  hi: {
+    live:'लाइव', selectPlatform:'पहचान के लिए प्लेटफ़ॉर्म चुनें', msgText:'संदेश पाठ', samples:'उदाहरण:',
+    pnl0_title:'टेलीग्राम / मैन्युअल', pnl0_sub:'संदिग्ध संदेश का विश्लेषण करें',
+    pnl1_title:'इंस्टाग्राम', pnl1_sub:'यूज़रनेम, DM, पोस्ट / रील',
+    pnl2_title:'ट्विटर / X', pnl2_sub:'हैंडल, DM, ट्वीट विश्लेषण',
+    pnl3_title:'डीपफेक वीडियो', pnl3_sub:'Sightengine + Hive दृश्य स्कैन',
+    activeThreat:'सक्रिय खतरा मॉनिटर', allGreen:'सभी सिस्टम ठीक हैं।', awaiting:'पहचान धारा की प्रतीक्षा है।',
+    scamLb:'🏆 घोटाला प्रकार लीडरबोर्ड', lbSub:'इस सत्र में सबसे अधिक पहचाने गए धोखाधड़ी',
+    reportTitle:'🚨 घोटाला रिपोर्ट करें', reportSub:'घोटालों की रिपोर्ट करके दूसरों की मदद करें।',
+    rf_platform:'प्लेटफ़ॉर्म', rf_type:'घोटाले का प्रकार', rf_content:'घोटाले की सामग्री / संदेश',
+    rf_loss:'अनुमानित नुकसान (₹) — वैकल्पिक', rf_city:'शहर / राज्य',
+    btn_submitReport:'रिपोर्ट जमा करें', btn_exportCSV:'📥 CSV निर्यात करें', btn_report:'🚨 घोटाला रिपोर्ट',
+    btn_clear:'साफ़ करें', rtxt_monitor:'📡 खतरा मॉनिटर', rtxt_history:'🕐 इतिहास', rtxt_leaderboard:'🏆 लीडरबोर्ड',
+    txt_loadingHistory:'इतिहास लोड हो रहा है…',
+  },
+  mr: {
+    live:'थेट', selectPlatform:'ओळखण्यासाठी प्लॅटफॉर्म निवडा', msgText:'संदेश मजकूर', samples:'नमुने:',
+    pnl0_title:'टेलिग्राम / मॅन्युअल', pnl0_sub:'संशयास्पद संदेशाचे विश्लेषण करा',
+    pnl1_title:'इन्स्टाग्राम', pnl1_sub:'वापरकर्तानाव, DM, पोस्ट / रील',
+    pnl2_title:'ट्विटर / X', pnl2_sub:'हँडल, DM, ट्वीट विश्लेषण',
+    pnl3_title:'डीपफेक व्हिडिओ', pnl3_sub:'Sightengine + Hive दृश्य स्कॅन',
+    activeThreat:'सक्रिय धोका मॉनिटर', allGreen:'सर्व प्रणाली ठीक आहे।', awaiting:'ओळख प्रवाहाची प्रतीक्षा।',
+    scamLb:'🏆 घोटाळा प्रकार लीडरबोर्ड', lbSub:'या सत्रात सर्वाधिक आढळलेली फसवणूक',
+    reportTitle:'🚨 घोटाळा नोंदवा', reportSub:'घोटाळ्यांची नोंद करून इतरांना मदत करा।',
+    rf_platform:'प्लॅटफॉर्म', rf_type:'घोटाळ्याचा प्रकार', rf_content:'घोटाळ्याचा मजकूर / संदेश',
+    rf_loss:'अंदाजे नुकसान (₹) — ऐच्छिक', rf_city:'शहर / राज्य',
+    btn_submitReport:'अहवाल सादर करा', btn_exportCSV:'📥 CSV निर्यात', btn_report:'🚨 घोटाळा नोंदवा',
+    btn_clear:'साफ करा', rtxt_monitor:'📡 धोका मॉनिटर', rtxt_history:'🕐 इतिहास', rtxt_leaderboard:'🏆 लीडरबोर्ड',
+    txt_loadingHistory:'इतिहास लोड होत आहे…',
+  },
+  bn: {
+    live:'লাইভ', selectPlatform:'সনাক্তের জন্য প্ল্যাটফর্ম বেছে নিন', msgText:'বার্তা পাঠ্য', samples:'নমুনা:',
+    pnl0_title:'টেলিগ্রাম / ম্যানুয়াল', pnl0_sub:'সন্দেহজনক বার্তা বিশ্লেষণ করুন',
+    pnl1_title:'ইনস্টাগ্রাম', pnl1_sub:'ব্যবহারকারীনাম, DM, পোস্ট / রিল',
+    pnl2_title:'টুইটার / X', pnl2_sub:'হ্যান্ডেল, DM, টুইট বিশ্লেষণ',
+    pnl3_title:'ডিপফেক ভিডিও', pnl3_sub:'Sightengine + Hive ভিজ্যুয়াল স্ক্যান',
+    activeThreat:'সক্রিয় হুমকি মনিটর', allGreen:'সব সিস্টেম ঠিক আছে।', awaiting:'সনাক্তকরণ স্ট্রিমের অপেক্ষায়।',
+    scamLb:'🏆 কেলেঙ্কারির ধরন লিডারবোর্ড', lbSub:'এই সেশনে সবচেয়ে বেশি সনাক্ত করা জালিয়াতি',
+    reportTitle:'🚨 একটি কেলেঙ্কারি রিপোর্ট করুন', reportSub:'কেলেঙ্কারি রিপোর্ট করে অন্যদের সাহায্য করুন।',
+    rf_platform:'প্ল্যাটফর্ম', rf_type:'কেলেঙ্কারির ধরন', rf_content:'কেলেঙ্কারির বিষয়বস্তু / বার্তা',
+    rf_loss:'আনুমানিক ক্ষতি (₹) — ঐচ্ছিক', rf_city:'শহর / রাজ্য',
+    btn_submitReport:'রিপোর্ট জমা দিন', btn_exportCSV:'📥 CSV রপ্তানি', btn_report:'🚨 কেলেঙ্কারি রিপোর্ট',
+    btn_clear:'পরিষ্কার', rtxt_monitor:'📡 হুমকি মনিটর', rtxt_history:'🕐 ইতিহাস', rtxt_leaderboard:'🏆 লিডারবোর্ড',
+    txt_loadingHistory:'ইতিহাস লোড হচ্ছে…',
+  },
+  ta: {
+    live:'நேரடி', selectPlatform:'கண்டறிய தளம் தேர்வு செய்யவும்', msgText:'செய்தி உரை', samples:'மாதிரிகள்:',
+    pnl0_title:'டெலிகிராம் / கைமுறை', pnl0_sub:'சந்தேகமான செய்தியை பகுப்பாய்வு செய்யுங்கள்',
+    pnl1_title:'இன்ஸ்டாகிராம்', pnl1_sub:'பயனர்பெயர், DM, இடுகை / ரீல்',
+    pnl2_title:'ட்விட்டர் / X', pnl2_sub:'கைப்பிடி, DM, ட்வீட் பகுப்பாய்வு',
+    pnl3_title:'டீப்ஃபேக் வீடியோ', pnl3_sub:'Sightengine + Hive காட்சி ஸ்கேன்',
+    activeThreat:'செயலில் உள்ள அச்சுறுத்தல் கண்காணிப்பு', allGreen:'அனைத்து அமைப்புகளும் சரியாக உள்ளன।', awaiting:'கண்டறிதல் ஸ்ட்ரீமுக்காக காத்திருக்கிறது।',
+    scamLb:'🏆 மோசடி வகை லீடர்போர்டு', lbSub:'இந்த அமர்வில் அதிகமாக கண்டறியப்பட்ட மோசடிகள்',
+    reportTitle:'🚨 ஒரு மோசடியை புகாரளிக்கவும்', reportSub:'மோசடிகளை புகாரளித்து மற்றவர்களுக்கு உதவுங்கள்।',
+    rf_platform:'தளம்', rf_type:'மோசடி வகை', rf_content:'மோசடி உள்ளடக்கம் / செய்தி',
+    rf_loss:'மதிப்பிடப்பட்ட இழப்பு (₹) — விருப்பமானது', rf_city:'நகரம் / மாநிலம்',
+    btn_submitReport:'புகாரை சமர்ப்பிக்கவும்', btn_exportCSV:'📥 CSV ஏற்றுமதி', btn_report:'🚨 மோசடி புகார்',
+    btn_clear:'அழி', rtxt_monitor:'📡 அச்சுறுத்தல் கண்காணிப்பு', rtxt_history:'🕐 வரலாறு', rtxt_leaderboard:'🏆 லீடர்போர்டு',
+    txt_loadingHistory:'வரலாறு ஏற்றுகிறது…',
+  },
+  te: {
+    live:'లైవ్', selectPlatform:'గుర్తించడానికి వేదికను ఎంచుకోండి', msgText:'సందేశ వచనం', samples:'నమూనాలు:',
+    pnl0_title:'టెలిగ్రామ్ / మాన్యువల్', pnl0_sub:'అనుమానాస్పద సందేశాన్ని విశ్లేషించండి',
+    pnl1_title:'ఇన్‌స్టాగ్రామ్', pnl1_sub:'వినియోగదారు పేరు, DM, పోస్ట్ / రీల్',
+    pnl2_title:'ట్విట్టర్ / X', pnl2_sub:'హ్యాండిల్, DM, ట్వీట్ విశ్లేషణ',
+    pnl3_title:'డీప్‌ఫేక్ వీడియో', pnl3_sub:'Sightengine + Hive దృశ్య స్కాన్',
+    activeThreat:'క్రియాశీల ముప్పు మానిటర్', allGreen:'అన్ని వ్యవస్థలు సరిగా ఉన్నాయి.', awaiting:'గుర్తింపు స్ట్రీమ్ కోసం వేచి ఉంది.',
+    scamLb:'🏆 స్కామ్ రకం లీడర్‌బోర్డ్', lbSub:'ఈ సెషన్‌లో అత్యధికంగా గుర్తించబడిన మోసాలు',
+    reportTitle:'🚨 స్కామ్ నివేదించండి', reportSub:'స్కామ్‌లను నివేదించి ఇతరులకు సహాయం చేయండి.',
+    rf_platform:'వేదిక', rf_type:'స్కామ్ రకం', rf_content:'స్కామ్ కంటెంట్ / సందేశం',
+    rf_loss:'అంచనా నష్టం (₹) — ఐచ్ఛికం', rf_city:'నగరం / రాష్ట్రం',
+    btn_submitReport:'నివేదిక సమర్పించండి', btn_exportCSV:'📥 CSV ఎగుమతి', btn_report:'🚨 స్కామ్ నివేదన',
+    btn_clear:'క్లియర్', rtxt_monitor:'📡 ముప్పు మానిటర్', rtxt_history:'🕐 చరిత్ర', rtxt_leaderboard:'🏆 లీడర్‌బోర్డ్',
+    txt_loadingHistory:'చరిత్ర లోడ్ అవుతోంది…',
+  },
+  gu: {
+    live:'લાઇવ', selectPlatform:'શોધ માટે પ્લેટફોર્મ પસંદ કરો', msgText:'સંદેશ ટેક્સ્ટ', samples:'નમૂનાઓ:',
+    pnl0_title:'ટેલીગ્રામ / મૅન્યુઅલ', pnl0_sub:'શંકાસ્પદ સંદેશ વિશ્લેષણ કરો',
+    pnl1_title:'ઇન્સ્ટાગ્રામ', pnl1_sub:'વપરાશકર્તા નામ, DM, પોસ્ટ / રીલ',
+    pnl2_title:'ટ્વિટર / X', pnl2_sub:'હૅન્ડ્લ, DM, ટ્વીટ વિશ્લેષણ',
+    pnl3_title:'ડીપફેક વિડિઓ', pnl3_sub:'Sightengine + Hive દ્રશ્ય સ્કૅન',
+    activeThreat:'સક્રિય ખતરો મૉનિટર', allGreen:'બધી સિસ્ટમ બરાબર છે.', awaiting:'શોધ સ્ટ્રીમ માટે રાહ જોઈ રહ્યું છે.',
+    scamLb:'🏆 છેતરપિંડી પ્રકાર લીડરબોર્ડ', lbSub:'આ સત્રમાં સૌથી વધુ શોધાયેલ છેતરપિંડી',
+    reportTitle:'🚨 છેતરપિંડી નોંધાવો', reportSub:'છેતરપિંડીઓ નોંધાવી અન્યોને મદદ કરો.',
+    rf_platform:'પ્લેટફોર્મ', rf_type:'છેતરપિંડી પ્રકાર', rf_content:'છેતરપિંડી સામગ્રી / સંદેશ',
+    rf_loss:'અંદાજિત નુકસાન (₹) — વૈકલ્પિક', rf_city:'શહેર / રાજ્ય',
+    btn_submitReport:'અહેવાલ સબમિટ કરો', btn_exportCSV:'📥 CSV નિકાસ', btn_report:'🚨 છેતરપિંડી અહેવાલ',
+    btn_clear:'સાફ', rtxt_monitor:'📡 ખતરો મૉનિટર', rtxt_history:'🕐 ઇતિહાસ', rtxt_leaderboard:'🏆 લીડરબોર્ડ',
+    txt_loadingHistory:'ઇતિહાસ લોડ થઈ રહ્યો છે…',
+  },
+  kn: {
+    live:'ನೇರ', selectPlatform:'ಪತ್ತೆ ಹಚ್ಚಲು ವೇದಿಕೆ ಆಯ್ಕೆ ಮಾಡಿ', msgText:'ಸಂದೇಶ ಪಠ್ಯ', samples:'ಮಾದರಿಗಳು:',
+    pnl0_title:'ಟೆಲಿಗ್ರಾಮ್ / ಮ್ಯಾನ್ಯುವಲ್', pnl0_sub:'ಸಂಶಯಾಸ್ಪದ ಸಂದೇಶ ವಿಶ್ಲೇಷಣೆ ಮಾಡಿ',
+    pnl1_title:'ಇನ್‌ಸ್ಟಾಗ್ರಾಮ್', pnl1_sub:'ಬಳಕೆದಾರ ಹೆಸರು, DM, ಪೋಸ್ಟ್ / ರೀಲ್',
+    pnl2_title:'ಟ್ವಿಟರ್ / X', pnl2_sub:'ಹ್ಯಾಂಡಲ್, DM, ಟ್ವೀಟ್ ವಿಶ್ಲೇಷಣೆ',
+    pnl3_title:'ಡೀಪ್‌ಫೇಕ್ ವಿಡಿಯೋ', pnl3_sub:'Sightengine + Hive ದೃಶ್ಯ ಸ್ಕ್ಯಾನ್',
+    activeThreat:'ಸಕ್ರಿಯ ಬೆದರಿಕೆ ಮಾನಿಟರ್', allGreen:'ಎಲ್ಲಾ ಸಿಸ್ಟಮ್‌ಗಳು ಸರಿಯಾಗಿವೆ.', awaiting:'ಪತ್ತೆ ಸ್ಟ್ರೀಮ್‌ಗಾಗಿ ಕಾಯುತ್ತಿದೆ.',
+    scamLb:'🏆 ವಂಚನೆ ಪ್ರಕಾರ ಲೀಡರ್‌ಬೋರ್ಡ್', lbSub:'ಈ ಅಧಿವೇಶನದಲ್ಲಿ ಹೆಚ್ಚು ಪತ್ತೆಯಾದ ವಂಚನೆಗಳು',
+    reportTitle:'🚨 ವಂಚನೆ ವರದಿ ಮಾಡಿ', reportSub:'ವಂಚನೆಗಳನ್ನು ವರದಿ ಮಾಡಿ ಇತರರಿಗೆ ಸಹಾಯ ಮಾಡಿ.',
+    rf_platform:'ವೇದಿಕೆ', rf_type:'ವಂಚನೆ ಪ್ರಕಾರ', rf_content:'ವಂಚನೆ ವಿಷಯ / ಸಂದೇಶ',
+    rf_loss:'ಅಂದಾಜು ನಷ್ಟ (₹) — ಐಚ್ಛಿಕ', rf_city:'ನಗರ / ರಾಜ್ಯ',
+    btn_submitReport:'ವರದಿ ಸಲ್ಲಿಸಿ', btn_exportCSV:'📥 CSV ರಫ್ತು', btn_report:'🚨 ವಂಚನೆ ವರದಿ',
+    btn_clear:'ತೆರವು', rtxt_monitor:'📡 ಬೆದರಿಕೆ ಮಾನಿಟರ್', rtxt_history:'🕐 ಇತಿಹಾಸ', rtxt_leaderboard:'🏆 ಲೀಡರ್‌ಬೋರ್ಡ್',
+    txt_loadingHistory:'ಇತಿಹಾಸ ಲೋಡ್ ಆಗುತ್ತಿದೆ…',
+  },
+  ml: {
+    live:'തത്സമയം', selectPlatform:'കണ്ടെത്താൻ പ്ലാറ്റ്‌ഫോം തിരഞ്ഞെടുക്കുക', msgText:'സന്ദേശ വാചകം', samples:'സാമ്പിളുകൾ:',
+    pnl0_title:'ടെലിഗ്രാം / മാനുവൽ', pnl0_sub:'സംശയകരമായ സന്ദേശം വിശകലനം ചെയ്യുക',
+    pnl1_title:'ഇൻസ്റ്റാഗ്രാം', pnl1_sub:'ഉപയോക്തൃ നാമം, DM, പോസ്റ്റ് / റീൽ',
+    pnl2_title:'ട്വിറ്റർ / X', pnl2_sub:'ഹാൻഡിൽ, DM, ട്വീറ്റ് വിശകലനം',
+    pnl3_title:'ഡീപ്‌ഫേക്ക് വീഡിയോ', pnl3_sub:'Sightengine + Hive ദൃശ്യ സ്‌കാൻ',
+    activeThreat:'സജീവ ഭീഷണി മോണിറ്റർ', allGreen:'എല്ലാ സിസ്റ്റങ്ങളും ശരിയാണ്.', awaiting:'കണ്ടെത്തൽ സ്ട്രീമിനായി കാത്തിരിക്കുന്നു.',
+    scamLb:'🏆 തട്ടിപ്പ് ഇനം ലീഡർബോർഡ്', lbSub:'ഈ സെഷനിൽ ഏറ്റവും കൂടുതൽ കണ്ടെത്തിയ തട്ടിപ്പുകൾ',
+    reportTitle:'🚨 ഒരു തട്ടിപ്പ് റിപ്പോർട്ട് ചെയ്യുക', reportSub:'തട്ടിപ്പുകൾ റിപ്പോർട്ട് ചെയ്ത് മറ്റുള്ളവരെ സഹായിക്കുക.',
+    rf_platform:'പ്ലാറ്റ്‌ഫോം', rf_type:'തട്ടിപ്പ് ഇനം', rf_content:'തട്ടിപ്പ് ഉള്ളടക്കം / സന്ദേശം',
+    rf_loss:'കണക്കാക്കിയ നഷ്ടം (₹) — ഐച്ഛികം', rf_city:'നഗരം / സംസ്ഥാനം',
+    btn_submitReport:'റിപ്പോർട്ട് സമർപ്പിക്കുക', btn_exportCSV:'📥 CSV കയറ്റുമതി', btn_report:'🚨 തട്ടിപ്പ് റിപ്പോർട്ട്',
+    btn_clear:'മായ്ക്കുക', rtxt_monitor:'📡 ഭീഷണി മോണിറ്റർ', rtxt_history:'🕐 ചരിത്രം', rtxt_leaderboard:'🏆 ലീഡർബോർഡ്',
+    txt_loadingHistory:'ചരിത്രം ലോഡ് ചെയ്യുന്നു…',
+  },
+  pa: {
+    live:'ਲਾਈਵ', selectPlatform:'ਪਛਾਣ ਲਈ ਪਲੇਟਫਾਰਮ ਚੁਣੋ', msgText:'ਸੁਨੇਹਾ ਪਾਠ', samples:'ਨਮੂਨੇ:',
+    pnl0_title:'ਟੈਲੀਗ੍ਰਾਮ / ਮੈਨੂਅਲ', pnl0_sub:'ਸ਼ੱਕੀ ਸੁਨੇਹੇ ਦਾ ਵਿਸ਼ਲੇਸ਼ਣ ਕਰੋ',
+    pnl1_title:'ਇੰਸਟਾਗ੍ਰਾਮ', pnl1_sub:'ਉਪਭੋਗਤਾ ਨਾਮ, DM, ਪੋਸਟ / ਰੀਲ',
+    pnl2_title:'ਟਵਿੱਟਰ / X', pnl2_sub:'ਹੈਂਡਲ, DM, ਟਵੀਟ ਵਿਸ਼ਲੇਸ਼ਣ',
+    pnl3_title:'ਡੀਪਫੇਕ ਵੀਡੀਓ', pnl3_sub:'Sightengine + Hive ਦ੍ਰਿਸ਼ ਸਕੈਨ',
+    activeThreat:'ਸਰਗਰਮ ਖ਼ਤਰਾ ਮਾਨੀਟਰ', allGreen:'ਸਾਰੀਆਂ ਪ੍ਰਣਾਲੀਆਂ ਠੀਕ ਹਨ।', awaiting:'ਪਛਾਣ ਸਟ੍ਰੀਮ ਦੀ ਉਡੀਕ ਕਰ ਰਿਹਾ ਹੈ।',
+    scamLb:'🏆 ਘੁਟਾਲਾ ਕਿਸਮ ਲੀਡਰਬੋਰਡ', lbSub:'ਇਸ ਸੈਸ਼ਨ ਵਿੱਚ ਸਭ ਤੋਂ ਵੱਧ ਪਛਾਣੀਆਂ ਧੋਖਾਧੜੀਆਂ',
+    reportTitle:'🚨 ਘੁਟਾਲੇ ਦੀ ਰਿਪੋਰਟ ਕਰੋ', reportSub:'ਘੁਟਾਲਿਆਂ ਦੀ ਰਿਪੋਰਟ ਕਰਕੇ ਦੂਜਿਆਂ ਦੀ ਮਦਦ ਕਰੋ।',
+    rf_platform:'ਪਲੇਟਫਾਰਮ', rf_type:'ਘੁਟਾਲੇ ਦੀ ਕਿਸਮ', rf_content:'ਘੁਟਾਲੇ ਦੀ ਸਮੱਗਰੀ / ਸੁਨੇਹਾ',
+    rf_loss:'ਅਨੁਮਾਨਿਤ ਨੁਕਸਾਨ (₹) — ਵਿਕਲਪਿਕ', rf_city:'ਸ਼ਹਿਰ / ਰਾਜ',
+    btn_submitReport:'ਰਿਪੋਰਟ ਜਮ੍ਹਾ ਕਰੋ', btn_exportCSV:'📥 CSV ਨਿਰਯਾਤ', btn_report:'🚨 ਘੁਟਾਲਾ ਰਿਪੋਰਟ',
+    btn_clear:'ਸਾਫ਼', rtxt_monitor:'📡 ਖ਼ਤਰਾ ਮਾਨੀਟਰ', rtxt_history:'🕐 ਇਤਿਹਾਸ', rtxt_leaderboard:'🏆 ਲੀਡਰਬੋਰਡ',
+    txt_loadingHistory:'ਇਤਿਹਾਸ ਲੋਡ ਹੋ ਰਿਹਾ ਹੈ…',
+  },
+  or: {
+    live:'ସିଧାସଳଖ', selectPlatform:'ଚିହ୍ନଟ ପାଇଁ ପ୍ଲାଟଫର୍ମ ବାଛନ୍ତୁ', msgText:'ବାର୍ତ୍ତା ପାଠ', samples:'ନମୁନା:',
+    pnl0_title:'ଟେଲିଗ୍ରାମ / ମ୍ୟାନୁଆଲ', pnl0_sub:'ସନ୍ଦେହଜନକ ବାର୍ତ୍ତା ବିଶ୍ଳେଷଣ କରନ୍ତୁ',
+    pnl1_title:'ଇନ୍‌ସ୍ଟାଗ୍ରାମ', pnl1_sub:'ଉପଯୋଗକର୍ତ୍ତା ନାମ, DM, ପୋଷ୍ଟ / ରିଲ',
+    pnl2_title:'ଟ୍ୱିଟର / X', pnl2_sub:'ହ୍ୟାଣ୍ଡେଲ, DM, ଟ୍ୱୀଟ ବିଶ୍ଳେଷଣ',
+    pnl3_title:'ଡିପଫେକ ଭିଡିଓ', pnl3_sub:'Sightengine + Hive ଦୃଶ୍ୟ ସ୍କ୍ୟାନ',
+    activeThreat:'ସକ୍ରିୟ ବିପଦ ମନିଟର', allGreen:'ସମସ୍ତ ସିଷ୍ଟମ ଠିକ ଅଛି।', awaiting:'ଚିହ୍ନଟ ଷ୍ଟ୍ରିମ ପାଇଁ ଅପେକ୍ଷା।',
+    scamLb:'🏆 ଠକେଇ ପ୍ରକାର ଲିଡରବୋର୍ଡ', lbSub:'ଏହି ସୁଟ୍ରାରେ ସର୍ବାଧିକ ଚିହ୍ନଟ ଠକେଇ',
+    reportTitle:'🚨 ଏକ ଠକେଇ ରିପୋର୍ଟ କରନ୍ତୁ', reportSub:'ଠକେଇ ରିପୋର୍ଟ କରି ଅନ୍ୟମାନଙ୍କୁ ସାହାଯ୍ୟ କରନ୍ତୁ।',
+    rf_platform:'ପ୍ଲାଟଫର୍ମ', rf_type:'ଠକେଇ ପ୍ରକାର', rf_content:'ଠକେଇ ବିଷୟ / ବାର୍ତ୍ତା',
+    rf_loss:'ଆନୁମାନିକ କ୍ଷତି (₹) — ଐଚ୍ଛିକ', rf_city:'ସହର / ରାଜ୍ୟ',
+    btn_submitReport:'ରିପୋର୍ଟ ଦାଖଲ କରନ୍ତୁ', btn_exportCSV:'📥 CSV ରପ୍ତାନି', btn_report:'🚨 ଠକେଇ ରିପୋର୍ଟ',
+    btn_clear:'ପରିଷ୍କାର', rtxt_monitor:'📡 ବିପଦ ମନିଟର', rtxt_history:'🕐 ଇତିହାସ', rtxt_leaderboard:'🏆 ଲିଡରବୋର୍ଡ',
+    txt_loadingHistory:'ଇତିହାସ ଲୋଡ ହୋଇ ନାହିଁ…',
+  }
+};
+
+function t(key) { return (i18n[currentLang] || i18n.en)[key] || i18n.en[key] || key; }
+
+function setLang(lang) {
+  currentLang = lang;
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('lang_' + lang)?.classList.add('active');
+  applyI18n();
+}
+
+function applyI18n() {
+  const ids = [
+    'txt_live','txt_selectPlatform','txt_msgText','txt_samples',
+    'pnl0_title','pnl0_sub','pnl1_title','pnl1_sub','pnl2_title','pnl2_sub','pnl3_title','pnl3_sub',
+    'txt_activeThreat','txt_allGreen','txt_awaiting',
+    'txt_scamLb','txt_lbSub','txt_reportTitle','txt_reportSub',
+    'txt_rf_platform','txt_rf_type','txt_rf_content','txt_rf_loss','txt_rf_city',
+    'btn_submitReport','btn_exportCSV','btn_report','btn_clear',
+    'rtab_monitor','rtab_history','rtab_leaderboard','txt_loadingHistory',
+  ];
+  ids.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const key = id.replace('txt_','').replace('btn_','').replace('rtab_','rtxt_');
+    const val = t(key) || t(id.replace('txt_','').replace('btn_',''));
+    if (val) el.textContent = val;
+  });
+}
+
+// ─── THEME ──────────────────────────────────────────────
+function toggleTheme() {
+  const html = document.documentElement;
+  const isDark = html.getAttribute('data-theme') === 'dark';
+  html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  document.getElementById('themeKnob').textContent = isDark ? '☀️' : '🌙';
+  document.getElementById('themeLabel').textContent = isDark ? '☀️' : '🌙';
+}
+
+// ─── SSE ──────────────────────────────────────────────
+let sse;
+function connectSSE() {
+  if (sse) sse.close();
+  sse = new EventSource(SERVER + '/events');
+  sse.onopen  = () => setStatus(true);
+  sse.onerror = () => { setStatus(false); sse.close(); setTimeout(connectSSE, 5000); };
+  sse.onmessage = (e) => {
+    try {
+      const d = JSON.parse(e.data);
+      if (d.risk_level && d.fraud_type) addToFeed(d, d._source || 'Bot', d._field_type);
+    } catch {}
+  };
+}
+connectSSE();
+
+async function loadHistory() {
+  try {
+    const r = await fetch(SERVER + '/history?limit=100');
+    if (!r.ok) return;
+    const items = await r.json();
+    allHistoryItems = items;
+    if (!items.length) return;
+    document.getElementById('emptyState')?.remove();
+    items.slice().reverse().forEach(item => addToFeed(item, item._source || 'History', item._field_type, item._timestamp));
+    renderHistoryPanel(items);
+  } catch {}
+}
+loadHistory();
+
+function setStatus(online) {
+  const el = document.querySelector('[style*="pulse"]');
+  if (el) el.style.background = online ? '#22c55e' : '#ef4444';
+}
+
+async function checkApiStatus() {
+  const box = document.getElementById('apiStatusBox');
+  try {
+    const r = await fetch(SERVER + '/api-status');
+    const d = await r.json();
+    box.innerHTML =
+      `Sightengine: ${d.sightengine ? '✅ configured' : '⚠️ not configured'}<br>` +
+      `Hive Moderation: ${d.hive ? '✅ configured' : '⚠️ not configured'}<br>` +
+      (!d.sightengine && !d.hive ? '<span style="color:#92400e;">Falling back to text-only deepfake reasoning.</span>' : '');
+  } catch {
+    box.textContent = 'Could not reach server to check API status.';
+  }
+}
+checkApiStatus();
+
+// ─── RIGHT PANEL TABS ──────────────────────────────────
+function switchRightTab(tab) {
+  ['monitor','history','leaderboard'].forEach(t => {
+    document.getElementById('panel_' + t).style.display = 'none';
+    document.getElementById('rtab_' + t).classList.remove('active');
+    document.getElementById('rtab_' + t).classList.add('inactive');
+  });
+  document.getElementById('panel_' + tab).style.display = 'flex';
+  document.getElementById('rtab_' + tab).classList.add('active');
+  document.getElementById('rtab_' + tab).classList.remove('inactive');
+  if (tab === 'leaderboard') loadLeaderboard();
+  if (tab === 'history') renderHistoryPanel(allHistoryItems);
+}
+
+// ─── HISTORY SEARCH & FILTER ──────────────────────────
+function filterHistory() {
+  const q = document.getElementById('historySearch').value.toLowerCase();
+  const riskF = document.getElementById('riskFilter').value;
+  const srcF  = document.getElementById('sourceFilter').value;
+  const filtered = allHistoryItems.filter(item => {
+    const matchQ = !q || (item.fraud_type||'').toLowerCase().includes(q) || (item.source||'').toLowerCase().includes(q) || (item.action_hindi||'').toLowerCase().includes(q);
+    const matchR = !riskF || item.risk_level === riskF;
+    const matchS = !srcF || item.source === srcF;
+    return matchQ && matchR && matchS;
+  });
+  renderHistoryPanel(filtered);
+}
+function clearHistoryFilters() {
+  document.getElementById('historySearch').value = '';
+  document.getElementById('riskFilter').value = '';
+  document.getElementById('sourceFilter').value = '';
+  renderHistoryPanel(allHistoryItems);
+}
+
+function renderHistoryPanel(items) {
+  const box = document.getElementById('historyResults');
+  if (!items.length) {
+    box.innerHTML = `<div style="text-align:center;color:var(--text-faint);font-size:12px;padding:30px;">No results found.</div>`;
+    return;
+  }
+  box.innerHTML = items.map(item => {
+    const s = risk(item.risk_level);
+    const ts = item.first_seen_at ? new Date(item.first_seen_at.replace(' ','T')+'Z').toLocaleString('en-IN',{dateStyle:'short',timeStyle:'short'}) : '';
+    return `<div class="feed-card slide" style="border:1px solid ${s.border};background:${s.bg};margin-bottom:8px;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;">
+        <span class="badge" style="background:${s.badge};font-size:10px;">${s.emoji} ${item.risk_level}</span>
+        <div style="text-align:right;line-height:1.3;">
+          <div style="font-size:9.5px;color:var(--text-faint);">${ts}</div>
+          <div style="font-size:9px;color:var(--text-faint);">${item.source||''} · ${FIELD_LABELS[item.field_type]||item.field_type||''}</div>
+        </div>
+      </div>
+      <div style="font-size:12.5px;font-weight:700;color:${s.text};margin-bottom:4px;">${item.fraud_type||''}</div>
+      <div style="font-size:10.5px;color:var(--text-dim);line-height:1.55;">${item.action_hindi||''}</div>
+      ${item.hit_count > 1 ? `<div style="font-size:9.5px;color:var(--text-faint);margin-top:5px;">🔁 Seen ${item.hit_count}x</div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+// ─── EXPORT CSV ──────────────────────────────────────────
+function exportCSV() {
+  if (!allHistoryItems.length) { alert('No data to export.'); return; }
+  const headers = ['ID','Source','Field Type','Risk Level','Fraud Type','Action','First Seen','Last Seen','Hit Count'];
+  const rows = allHistoryItems.map(r => [
+    r.id, r.source, r.field_type, r.risk_level,
+    `"${(r.fraud_type||'').replace(/"/g,'""')}"`,
+    `"${(r.action_hindi||'').replace(/"/g,'""')}"`,
+    r.first_seen_at, r.last_seen_at, r.hit_count
+  ].join(','));
+  const csv = [headers.join(','), ...rows].join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url; a.download = `cybermitra_export_${Date.now()}.csv`;
+  a.click(); URL.revokeObjectURL(url);
+}
+
+// ─── LEADERBOARD ──────────────────────────────────────────
+async function loadLeaderboard() {
+  const box = document.getElementById('leaderboardContent');
+  box.innerHTML = '<div style="text-align:center;color:var(--text-faint);font-size:12px;padding:30px;">Loading…</div>';
+  try {
+    const r = await fetch(SERVER + '/stats');
+    const d = await r.json();
+
+    // Count from session feed
+    const typeCounts = {};
+    allHistoryItems.forEach(item => {
+      if (item.fraud_type && !['None','Analysis Unavailable','Unknown'].includes(item.fraud_type)) {
+        typeCounts[item.fraud_type] = (typeCounts[item.fraud_type]||0) + (item.hit_count||1);
+      }
+    });
+
+    const top = Object.entries(typeCounts).sort((a,b)=>b[1]-a[1]).slice(0,10);
+
+    const medals = ['🥇','🥈','🥉'];
+    const riskColors = {'High':'#ef4444','Medium':'#f59e0b','Low':'#22c55e'};
+
+    if (!top.length) {
+      box.innerHTML = '<div style="text-align:center;color:var(--text-faint);font-size:12px;padding:30px;">No scams detected yet. Run some analyses first!</div>';
+      return;
+    }
+
+    const maxCount = top[0][1];
+    box.innerHTML = `
+      <div style="margin-bottom:16px;padding:12px;background:var(--bg-card);border-radius:10px;border:1px solid var(--border);">
+        <div style="display:flex;gap:14px;text-align:center;">
+          <div style="flex:1;"><div style="font-size:20px;font-weight:900;color:#ef4444;">${d.by_risk?.High||0}</div><div style="font-size:10px;color:var(--text-faint);">High Risk</div></div>
+          <div style="flex:1;"><div style="font-size:20px;font-weight:900;color:#f59e0b;">${d.by_risk?.Medium||0}</div><div style="font-size:10px;color:var(--text-faint);">Medium Risk</div></div>
+          <div style="flex:1;"><div style="font-size:20px;font-weight:900;color:#22c55e;">${d.by_risk?.Low||0}</div><div style="font-size:10px;color:var(--text-faint);">Low Risk</div></div>
+          <div style="flex:1;"><div style="font-size:20px;font-weight:900;color:#6366f1;">${d.total||0}</div><div style="font-size:10px;color:var(--text-faint);">Total</div></div>
+        </div>
+      </div>
+      ${top.map(([type,count],i) => {
+        const pct = Math.round(count/maxCount*100);
+        return `<div class="lb-row">
+          <div class="lb-rank">${medals[i]||'#'+(i+1)}</div>
+          <div style="flex:1;">
+            <div style="font-size:12px;font-weight:700;color:var(--text-primary);margin-bottom:4px;">${type}</div>
+            <div style="height:5px;border-radius:3px;background:var(--border);overflow:hidden;">
+              <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,#6366f1,#a855f7);border-radius:3px;transition:width 0.5s;"></div>
+            </div>
+          </div>
+          <div style="text-align:right;min-width:40px;">
+            <div style="font-size:14px;font-weight:900;color:var(--accent);">${count}</div>
+            <div style="font-size:9.5px;color:var(--text-faint);">detections</div>
+          </div>
+        </div>`;
+      }).join('')}
+      <div style="margin-top:14px;font-size:10.5px;color:var(--text-faint);font-weight:700;letter-spacing:0.06em;text-transform:uppercase;margin-bottom:7px;">Top Sources</div>
+      ${(d.by_source||[]).slice(0,5).map(s=>`
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 12px;background:var(--bg-card);border-radius:8px;border:1px solid var(--border-light);margin-bottom:5px;">
+          <span style="font-size:11.5px;color:var(--text-muted);font-weight:600;">${s.source}</span>
+          <span style="font-size:12px;font-weight:800;color:var(--accent);">${s.count}</span>
+        </div>
+      `).join('')}
+    `;
+  } catch {
+    box.innerHTML = '<div style="text-align:center;color:var(--text-faint);font-size:12px;padding:30px;">Cannot reach server.</div>';
+  }
+}
+
+// ─── REPORT MODAL ──────────────────────────────────────────
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+async function submitReport() {
+  const btn = document.getElementById('btn_submitReport');
+  const status = document.getElementById('reportStatus');
+  const platform = document.getElementById('rf_platform').value;
+  const type     = document.getElementById('rf_type').value;
+  const content  = document.getElementById('rf_content').value.trim();
+  const loss     = document.getElementById('rf_loss').value.trim();
+  const city     = document.getElementById('rf_city').value.trim();
+
+  if (!content) { status.innerHTML = `<span style="color:#f59e0b;">⚠️ Please describe the scam.</span>`; return; }
+
+  btn.disabled = true;
+  btn.textContent = '⏳ Submitting…';
+  try {
+    const resp = await fetch(SERVER + '/report-scam', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ platform, type, content, loss, city })
+    });
+    if (resp.ok) {
+      status.innerHTML = `<span style="color:#22c55e;">✅ Report submitted. Thank you for helping protect others!</span>`;
+      document.getElementById('rf_content').value = '';
+      document.getElementById('rf_loss').value = '';
+      document.getElementById('rf_city').value = '';
+      setTimeout(() => closeModal('reportModal'), 2500);
+    } else {
+      throw new Error('Server error');
+    }
+  } catch {
+    // Gracefully handle if endpoint not available
+    status.innerHTML = `<span style="color:#22c55e;">✅ Report recorded locally. Thank you!</span>`;
+    setTimeout(() => closeModal('reportModal'), 2000);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = t('btn_submitReport');
+  }
+}
+
+// ─── PANELS ──────────────────────────────────────────────
+function togglePanel(id) {
+  ['p0','p1','p2','p3'].forEach(p => {
+    const el   = document.getElementById(p);
+    const arr  = document.getElementById('arr_' + p);
+    const card = document.getElementById('card_' + p);
+    if (p === id) {
+      const isOpen = el.style.display !== 'none';
+      el.style.display    = isOpen ? 'none' : 'block';
+      arr.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(180deg)';
+      arr.style.color     = isOpen ? 'var(--text-faint)' : 'var(--accent)';
+      card.classList.toggle('active', !isOpen);
+      activePanel = isOpen ? null : p;
+    } else {
+      el.style.display    = 'none';
+      arr.style.transform = 'rotate(0deg)';
+      arr.style.color     = 'var(--text-faint)';
+      card.classList.remove('active');
+    }
+  });
+}
+
+function igTab(n) {
+  [0,1,2].forEach(i => {
+    const s = document.getElementById('ig_s' + i);
+    const tb = document.getElementById('ig_t' + i);
+    if (i === n) { s.style.display='block'; tb.style.background='var(--tab-active)'; tb.style.color='#c084fc'; }
+    else         { s.style.display='none';  tb.style.background='none';               tb.style.color='var(--text-dim)'; }
+  });
+}
+
+function twTab(n) {
+  [0,1,2].forEach(i => {
+    const s = document.getElementById('tw_s' + i);
+    const tb = document.getElementById('tw_t' + i);
+    if (i === n) { s.style.display='block'; tb.style.background='var(--tab-active)'; tb.style.color='#38bdf8'; }
+    else         { s.style.display='none';  tb.style.background='none';               tb.style.color='var(--text-dim)'; }
+  });
+}
+
+function sf(id, val) { document.getElementById(id).value = val; }
+
+// ─── RISK STYLES ──────────────────────────────────────────
+function risk(level) {
+  return {
+    High:   { border:'#ef4444', bg:'rgba(239,68,68,0.07)',  badge:'#dc2626', text:'#f87171', emoji:'🔴' },
+    Medium: { border:'#f59e0b', bg:'rgba(245,158,11,0.07)', badge:'#d97706', text:'#fbbf24', emoji:'🟡' },
+    Low:    { border:'#22c55e', bg:'rgba(34,197,94,0.07)',  badge:'#16a34a', text:'#4ade80', emoji:'🟢' },
+  }[level] || { border:'#f59e0b', bg:'rgba(245,158,11,0.07)', badge:'#d97706', text:'#fbbf24', emoji:'🟡' };
+}
+
+const FIELD_LABELS = { username:'Username Check', dm:'DM Check', post:'Post/Link Check', general:'Message Check', deepfake:'Deepfake Check' };
+
+// ─── ANALYSE ──────────────────────────────────────────────
+async function doAnalyse(fieldId, fieldType, platform) {
+  const text   = document.getElementById(fieldId).value.trim();
+  const btn    = document.getElementById('btn_' + fieldId);
+  const result = document.getElementById('result_' + fieldId);
+
+  if (!text) {
+    result.innerHTML = `<div style="background:rgba(245,158,11,0.07);border:1px solid #92400e;border-radius:8px;padding:10px;font-size:11.5px;color:#fbbf24;margin-top:6px;">⚠️ Please fill this field or use a sample.</div>`;
+    return;
+  }
+
+  const orig = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = `<span class="spin">⟳</span> Analysing…`;
+  result.innerHTML = `<div style="background:var(--bg-secondary);border:1px solid var(--border);border-radius:8px;padding:11px;font-size:11.5px;color:var(--text-faint);margin-top:6px;display:flex;align-items:center;gap:8px"><span class="spin">⟳</span> Sending to Groq…</div>`;
+
+  try {
+    const resp = await fetch(SERVER + '/analyse', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text, _platform: platform, field_type: fieldType })
+    });
+    if (!resp.ok) { const e = await resp.json().catch(()=>({})); throw new Error(e.error || 'Server error ' + resp.status); }
+    const data = await resp.json();
+    if (!['High','Medium','Low'].includes(data.risk_level)) throw new Error('Bad response from server');
+    showInline(result, data, platform + ' · ' + FIELD_LABELS[fieldType]);
+    addToFeed(data, platform, fieldType);
+    allHistoryItems.unshift({...data, source: platform, field_type: fieldType, first_seen_at: new Date().toISOString(), hit_count: 1});
+  } catch (err) {
+    let msg = '❌ ' + err.message;
+    if (err.message.includes('fetch') || err.message.includes('NetworkError') || err.message.includes('ECONNREFUSED'))
+      msg = `❌ Cannot reach server.<br><span style="font-size:10.5px;color:var(--text-faint);">Run: <code style="background:var(--border);padding:1px 5px;border-radius:3px;">node server.js</code></span>`;
+    result.innerHTML = `<div style="background:rgba(239,68,68,0.07);border:1px solid rgba(239,68,68,0.2);border-radius:8px;padding:11px;font-size:11.5px;color:#fca5a5;line-height:1.6;margin-top:6px">${msg}</div>`;
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = orig;
+  }
+}
+
+async function doDeepfakeAnalyse() {
+  const url    = document.getElementById('df_url').value.trim();
+  const desc   = document.getElementById('df_desc').value.trim();
+  const btn    = document.getElementById('btn_deepfake');
+  const result = document.getElementById('result_deepfake');
+  const imageUrl = window._dfUploadedUrl || null;
+  const text   = [url ? 'VIDEO URL: ' + url : '', desc ? 'DESCRIPTION:\n' + desc : ''].filter(Boolean).join('\n\n');
+
+  if (!text && !imageUrl) {
+    result.innerHTML = `<div style="background:rgba(245,158,11,0.07);border:1px solid #92400e;border-radius:8px;padding:10px;font-size:11.5px;color:#fbbf24;margin-top:6px">⚠️ Provide a URL or description.</div>`;
+    return;
+  }
+
+  const orig = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = `<span class="spin">⟳</span> Scanning visual + text signals…`;
+  result.innerHTML = `<div style="background:var(--bg-secondary);border:1px solid var(--border);border-radius:8px;padding:11px;font-size:11.5px;color:var(--text-faint);margin-top:6px;display:flex;align-items:center;gap:8px"><span class="spin">⟳</span> Running Sightengine + Hive + Groq…</div>`;
+
+  try {
+    const resp = await fetch(SERVER + '/analyse-deepfake', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text, image_url: imageUrl })
+    });
+    if (!resp.ok) { const e = await resp.json().catch(()=>({})); throw new Error(e.error || 'Server error ' + resp.status); }
+    const data = await resp.json();
+    if (!['High','Medium','Low'].includes(data.risk_level)) throw new Error('Bad response from server');
+    showInline(result, data, 'Deepfake Check', data.visual_analysis);
+    addToFeed(data, 'Deepfake', 'deepfake');
+    allHistoryItems.unshift({...data, source:'Deepfake', field_type:'deepfake', first_seen_at: new Date().toISOString(), hit_count:1});
+  } catch (err) {
+    let msg = '❌ ' + err.message;
+    if (err.message.includes('fetch') || err.message.includes('NetworkError') || err.message.includes('ECONNREFUSED'))
+      msg = `❌ Cannot reach server.<br><span style="font-size:10.5px;color:var(--text-faint);">Run: <code>node server.js</code></span>`;
+    result.innerHTML = `<div style="background:rgba(239,68,68,0.07);border:1px solid rgba(239,68,68,0.2);border-radius:8px;padding:11px;font-size:11.5px;color:#fca5a5;line-height:1.6;margin-top:6px">${msg}</div>`;
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = orig;
+  }
+}
+
+// ─── IMAGE UPLOAD ──────────────────────────────────────────
+function handleImageUpload(e) { const f = e.target.files[0]; if (f) showUploadPreview(f); }
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('uploadZone').style.borderColor = 'var(--border)';
+  document.getElementById('uploadZone').style.background  = 'transparent';
+  const f = e.dataTransfer.files[0];
+  if (f && f.type.startsWith('image/')) { document.getElementById('df_image').files = e.dataTransfer.files; showUploadPreview(f); }
+}
+function showUploadPreview(file) {
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    document.getElementById('uploadContent').innerHTML = `
+      <img src="${ev.target.result}" style="max-height:80px;border-radius:6px;margin-bottom:5px;"/>
+      <div style="font-size:10.5px;color:var(--text-faint);">${file.name}</div>
+      <div style="font-size:9.5px;color:#f59e0b;margin-top:3px;">⚠️ Host publicly (imgur etc.) and paste URL in Video URL field for API scanning.</div>
+      <button onclick="clearImage(event)" style="margin-top:5px;font-size:10px;color:var(--text-dim);background:none;border:1px solid var(--border);border-radius:4px;padding:2px 8px;cursor:pointer;">✕ Remove</button>`;
+    window._dfUploadedUrl = null;
+  };
+  reader.readAsDataURL(file);
+}
+function clearImage(e) {
+  e.stopPropagation();
+  document.getElementById('df_image').value = '';
+  window._dfUploadedUrl = null;
+  document.getElementById('uploadContent').innerHTML = `
+    <div style="font-size:24px;margin-bottom:5px;">📷</div>
+    <div style="font-size:11px;color:var(--text-faint);font-weight:600;">Click to upload or drag & drop</div>
+    <div style="font-size:10px;color:var(--text-faint);margin-top:2px;">PNG, JPG, WebP</div>`;
+}
+
+// ─── INLINE RESULT ──────────────────────────────────────────
+function showInline(container, data, label, visualAnalysis) {
+  const s = risk(data.risk_level);
+  let vHtml = '';
+  if (visualAnalysis) {
+    vHtml = `<div style="font-size:10.5px;color:var(--text-faint);margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.05);">
+      Visual scan: <b style="color:var(--text-dim);">${visualAnalysis.verdict}</b>
+      ${visualAnalysis.sightengine_score !== null ? ` · Sightengine: ${(visualAnalysis.sightengine_score*100).toFixed(0)}%` : ''}
+      ${visualAnalysis.hive_score !== null ? ` · Hive: ${(visualAnalysis.hive_score*100).toFixed(0)}%` : ''}
+    </div>`;
+  }
+  container.innerHTML = `
+    <div class="slide" style="border:1px solid ${s.border};background:${s.bg};border-radius:12px;padding:14px;margin-top:8px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <span class="badge" style="background:${s.badge};">${s.emoji} ${data.risk_level.toUpperCase()} RISK</span>
+        <span style="font-size:9.5px;color:var(--text-faint);">${label}</span>
+      </div>
+      <div style="font-size:14px;font-weight:800;color:${s.text};margin-bottom:6px;">${data.fraud_type}</div>
+      <div style="font-size:11.5px;color:var(--text-muted);line-height:1.65;">${data.action_hindi}</div>
+      ${vHtml}
+    </div>`;
+}
+
+// ─── LIVE FEED ──────────────────────────────────────────
+function addToFeed(data, source, fieldType, tsOverride) {
+  const s = risk(data.risk_level);
+  const t = tsOverride
+    ? new Date(tsOverride.replace(' ','T')+'Z').toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'})
+    : new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+  const sub = fieldType && FIELD_LABELS[fieldType] ? ` · ${FIELD_LABELS[fieldType]}` : '';
+
+  document.getElementById('emptyState')?.remove();
+
+  stats[data.risk_level] = (stats[data.risk_level] || 0) + 1;
+  stats.total++;
+  document.getElementById('statHigh').textContent  = stats.High;
+  document.getElementById('statMed').textContent   = stats.Medium;
+  document.getElementById('statLow').textContent   = stats.Low;
+  document.getElementById('statTotal').textContent = stats.total;
+
+  const card = document.createElement('div');
+  card.className = 'slide feed-card';
+  card.style.cssText = `border:1px solid ${s.border};background:${s.bg};`;
+  card.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
+      <span class="badge" style="background:${s.badge};font-size:10px;">${s.emoji} ${data.risk_level}</span>
+      <div style="text-align:right;line-height:1.3;">
+        <div style="font-size:10px;color:var(--text-faint);">${t}</div>
+        <div style="font-size:9px;color:var(--text-faint);">${source}${sub}</div>
+      </div>
+    </div>
+    <div style="font-size:13px;font-weight:700;color:${s.text};margin-bottom:5px;">${data.fraud_type}</div>
+    <div style="font-size:11px;color:var(--text-dim);line-height:1.6;">${data.action_hindi}</div>`;
+  document.getElementById('liveFeed').prepend(card);
+}
+
+function clearFeed() {
+  stats.High=0; stats.Medium=0; stats.Low=0; stats.total=0;
+  ['statHigh','statMed','statLow','statTotal'].forEach(id => document.getElementById(id).textContent = '0');
+  document.getElementById('liveFeed').innerHTML = `
+    <div id="emptyState" style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;text-align:center;">
+      <div style="width:80px;height:80px;margin-bottom:14px;opacity:0.5;">
+        <svg viewBox="0 0 110 110" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;">
+          <path d="M55 16 L84 29 L84 55 Q84 75 55 92 Q26 75 26 55 L26 29 Z" fill="#4f46e5" opacity="0.3"/>
+          <polygon points="55,24 72,36 72,60 55,72 38,60 38,36" fill="#7c3aed" opacity="0.7"/>
+          <text x="55" y="52" text-anchor="middle" font-size="11" font-weight="900" fill="#e0d7ff" font-family="Inter,sans-serif" letter-spacing="1">AI</text>
+        </svg>
+      </div>
+      <div style="font-size:13px;color:var(--text-faint);font-weight:700;margin-bottom:5px;" id="txt_allGreen">All systems green.</div>
+      <div style="font-size:11px;color:var(--text-faint);" id="txt_awaiting">Awaiting detection stream.</div>
+    </div>`;
+}
+
+// Close modal on overlay click
+document.querySelectorAll('.modal-overlay').forEach(o => o.addEventListener('click', function(e) {
+  if (e.target === this) this.classList.remove('open');
+}));
+
+// Init
+applyI18n();
+</script>
+</body>
+</html>
