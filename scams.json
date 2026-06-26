@@ -1,0 +1,47 @@
+{
+  "Congratulation you have won 500000 ruppess send your adhar and bank detail::Telegram/Manual::general": {
+    "risk_level": "Medium",
+    "fraud_type": "Analysis Unavailable",
+    "action_hindi": "संदेश संदिग्ध लग रहा है। किसी विश्वसनीय व्यक्ति से सलाह लें।"
+  },
+  "congratulation you have won 500000 ruppess send your adhar detail and bank account::Telegram/Manual::general": {
+    "risk_level": "High",
+    "fraud_type": "Phishing",
+    "action_hindi": "कृपया अपनी व्यक्तिगत जानकारी साझा न करें और इस संदेश को तुरंत रिपोर्ट करें।"
+  },
+  "congratulation you have won 50000 ruppees give me adhar and other detail::Telegram/Manual::general": {
+    "risk_level": "High",
+    "fraud_type": "Phishing",
+    "action_hindi": "कृपया अपनी व्यक्तिगत जानकारी साझा न करें और इस संदेश को तुरंत रिपोर्ट करें।"
+  },
+  "congratulation you have won 50000 ruppess send me your adhar and other details::Telegram/Manual::general": {
+    "risk_level": "High",
+    "fraud_type": "Phishing",
+    "action_hindi": "कृपया अपनी व्यक्तिगत जानकारी साझा न करें और इस संदेश को तुरंत रिपोर्ट करें"
+  },
+  "cbi wale ne bola h ki digital arrest me fhas gye mujhe aap 50000 ruppess bhejo::Telegram/Manual::general": {
+    "risk_level": "High",
+    "fraud_type": "Extortion Scam",
+    "action_hindi": "Kisi bhi tarah ka paise na bhejein, police ya cybercrime cell ko report karein."
+  },
+  "congratulation you have 512332 ruppes send your adhar and bank detail::Telegram/Manual::general": {
+    "risk_level": "High",
+    "fraud_type": "Phishing",
+    "action_hindi": "कृपया अपनी व्यक्तिगत जानकारी साझा न करें और इस संदेश को तुरंत रिपोर्ट करें"
+  },
+  "https://t.me/+m2orDM4FHjdkODRk::Manual::general": {
+    "risk_level": "High",
+    "fraud_type": "Investment Scam",
+    "action_hindi": "कृपया इस लिंक पर क्लिक न करें और अपनी व्यक्तिगत जानकारी साझा न करें, यह एक संभावित निवेश घोटाला हो सकता है।"
+  },
+  "Hello I want to know in which sector I should go as I am a science student::Manual::general": {
+    "risk_level": "Low",
+    "fraud_type": "None",
+    "action_hindi": "आपको अपने रुचि और क्षमता के अनुसार क्षेत्र चुनना चाहिए, और इसके लिए आप अपने शिक्षक या करियर काउंसलर से सलाह ले सकते हैं।"
+  },
+  "Hello I want to know in which sector I should go as I am a science student::Telegram Bot::general": {
+    "risk_level": "Low",
+    "fraud_type": "None",
+    "action_hindi": "आपको अपने रुचि और क्षमता के अनुसार क्षेत्र चुनना चाहिए, और इसके लिए आप अपने शिक्षक या करियर काउंसलर से सलाह ले सकते हैं।"
+  }
+}

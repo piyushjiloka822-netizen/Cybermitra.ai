@@ -1,0 +1,26 @@
+{
+  "name": "cyberMitra-ai",
+  "version": "4.0.0",
+  "description": "Real-time Scam Detection with Groq + Telegram + SQLite | Multilingual, Dark/Light Mode, History Search, CSV Export, Leaderboard, Scam Reporting",
+  "main": "server.js",
+  "engines": {
+    "node": ">=22.5.0"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "bot": "node telegram.js",
+    "dev": "concurrently \"npm run start\" \"npm run bot\"",
+    "db:reset": "node scripts/reset-db.js"
+  },
+  "dependencies": {
+    "axios": "^1.17.0",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "groq-sdk": "^1.2.1",
+    "telegraf": "^4.16.3"
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.3"
+  }
+}
